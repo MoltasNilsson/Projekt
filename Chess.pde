@@ -10,9 +10,7 @@
  Add win-message.
  Allow to pick what piece to promote to, and remove Amazon piece (it's hella OP).
  Add gamemodes, eg Fairy chess.
- */
-
-
+*/
 
 static PImage wKing, bKing, wQueen, bQueen, wPawn, bPawn, wRook, bRook, wKnight, bKnight, wBishop, bBishop, wAmazon, bAmazon;
 PImage[][] board, prevBoard;
@@ -72,19 +70,20 @@ void draw() {
   showBoard(); //Most of the game is driven by the mousePressed() function, which is auto-called.
 }
 
-void showBoard() {
-  if (keyPressed) {
-    if (key == ENTER || key == RETURN) { //Move back one move if enter/return is pressed.
-      board = prevBoard;
-      turn--;
-    }
+void keyReleased(){ //The keyReleased function checks for when a key (enter) is released. Used instead of keyPressed in order to only be called once.
+  if (key == ENTER || key == RETURN) { //Move back one move if enter/return is pressed.
+    board = prevBoard;
+    turn--;
   }
+}
+
+void showBoard() {
   for (int i = 0; i<8; i++) {
     for (int j = 0; j<8; j++) { 
       if ((i+j)%2 == 0) fill(255, 206, 158); //Checkered board.
       else fill(209, 139, 71);
       rect(i*width/8, j*height/8, width/8, height/8);//Board
-      if (board[j][i] != null) image(board[j][i], i*width/8, j*height/8);//Pieces
+      if (board[j][i] != null) image(board[j][i], i*width/8, j*height/8);//Fill board with pieces
       if (j == y1 && i == x1 && board[j][i] != null && isStarted) {
         fill(0, 0, 255, 100);//Highlight selected piece in blue.
         rect(i*width/8, j*height/8, width/8, height/8);
@@ -135,8 +134,9 @@ void startPosition() {
   board[6][5] = wPawn;
   board[6][6] = wPawn;
   board[6][7] = wPawn;
+  
+  prevBoard = Board.boardSaver(board);
 
-  //Variable declarations:
   clicked = false;
   turn = 1;
   isStarted = false;
@@ -149,16 +149,14 @@ void mousePressed() {
     x2 = round(mouseX / (width/8)-0.5);
     if (Rules.moveChecker(y1, x1, y2, x2, board)) {
       //Following 2 if-statements are auto-promotions, if the move is a Pawn that has reached the other side. It promotes to an Amazon, an over powered "fairy" piece. An easter egg ;)
+      prevBoard = Board.boardSaver(board); //Save the current round as a temp if a mistake is made, in order to allow for backing.
       if (board[y1][x1] == wPawn && y2 == 0) {
-        prevBoard = Board.boardSaver(board);
         board[y2][x2] = wAmazon;
         board[y1][x1] = null;
       } else if (board[y1][x1] == bPawn && y2 == 7) {
-        prevBoard = Board.boardSaver(board); 
         board[y2][x2] = bAmazon;
         board[y1][x1] = null;
       } else {
-        prevBoard = Board.boardSaver(board); //Save the current round as a temp if a mistake is made, in order to allow for backing.
         board = Board.movePiece(y1, x1, y2, x2, board);
       }
       clicked = false;
